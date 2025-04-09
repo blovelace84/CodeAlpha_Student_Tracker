@@ -1,9 +1,27 @@
+import json
+
+grade_file = "student_grades.json"
 grades = {}  # Keep the global grades dictionary here if you're not using classes
+
+try:
+    with open(grade_file, 'r') as f:
+        grades = json.load(f)
+    print("Existing grades loaded from file.")
+except FileNotFoundError:
+    print("No existing grades file found. Starting with an empty tracker.")
+except json.JSONDecodeError:
+    print("Error decoding JSON from file. Starting with an empty tracker.")
+
+def _save_grades():
+    with open(grade_file, 'w') as f:
+        json.dump(grades, f, indent=4) #Use index for better readability
+    print(f"Grades saved to '{grade_file}'.")
 
 def add_student(student_name):
     global grades
     if student_name not in grades:
         grades[student_name] = {}
+        _save_grades() # Save after adding a student
         print(f"Student '{student_name}' added successfully.")
     else:
         print(f"Student '{student_name}' already exists.")
@@ -12,6 +30,7 @@ def add_assignment(assignment_name):
     global grades
     for student in grades:
         grades[student][assignment_name] = None
+    _save_grades()
     print(f"Assignment '{assignment_name}' added for all students.")
 
 def record_grade(student_name, assignment_name, grade):
@@ -22,6 +41,7 @@ def record_grade(student_name, assignment_name, grade):
                 grade = float(grade)
                 if 0 <= grade <= 100:
                     grades[student_name][assignment_name] = grade
+                    _save_grades()
                     print(f"Grade {grade} recorded for '{student_name}' in '{assignment_name}'.")
                 else:
                     print("Invalid grade. Please enter a value between 0 and 100.")
